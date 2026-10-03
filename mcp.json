@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "nexus-crm": {
+      "command": "node",
+      "args": ["server.ts"],
+      "env": {
+        "PORT": "3000",
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}"
+      },
+      "url": "https://ais-dev-f3cvlhbxe5zevt6qccu2nb-478429180564.asia-southeast1.run.app/api/ai/mcp"
+    }
+  }
+}

@@ -1,0 +1,666 @@
+{
+  "companies": [
+    {
+      "id": "comp-1",
+      "name": "Linear Systems",
+      "domain": "linear.app",
+      "tier": "Enterprise",
+      "arr": 145000,
+      "dealCount": 2,
+      "city": "San Francisco",
+      "country": "USA",
+      "employees": 84,
+      "primaryContact": "Karri Saarinen",
+      "owner": "Alex Vance",
+      "status": "Active",
+      "notes": "Renewed 2-year enterprise agreement. Evaluating AI Copilot integration for sales engineering.",
+      "tags": [
+        "SaaS",
+        "Developer Tools",
+        "High ARR"
+      ],
+      "techStack": [
+        "TypeScript",
+        "GraphQL",
+        "PostgreSQL",
+        "React",
+        "Rust"
+      ],
+      "aiHealthScore": 94,
+      "aiSummary": "High-momentum strategic account with strong executive sponsorship and near-zero churn probability.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "comp-2",
+      "name": "Vercel Inc.",
+      "domain": "vercel.com",
+      "tier": "Enterprise",
+      "arr": 280000,
+      "dealCount": 3,
+      "city": "San Francisco",
+      "country": "USA",
+      "employees": 520,
+      "primaryContact": "Guillermo Rauch",
+      "owner": "Sarah Miller",
+      "status": "Active",
+      "notes": "Expanding edge routing telemetry pipeline to APAC regions. Exploring native MCP tooling.",
+      "tags": [
+        "Cloud",
+        "Frontend Infrastructure",
+        "Enterprise"
+      ],
+      "techStack": [
+        "Next.js",
+        "Rust",
+        "Turborepo",
+        "AWS",
+        "TypeScript"
+      ],
+      "aiHealthScore": 91,
+      "aiSummary": "Tier 1 expansion account. Next step is technical architecture review with edge engineering leads.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "comp-3",
+      "name": "Supabase Inc.",
+      "domain": "supabase.com",
+      "tier": "Mid-Market",
+      "arr": 95000,
+      "dealCount": 1,
+      "city": "Singapore",
+      "country": "Singapore",
+      "employees": 110,
+      "primaryContact": "Paul Copplestone",
+      "owner": "David Kim",
+      "status": "Active",
+      "notes": "Custom PostgreSQL replication integration running smoothly with sub-10ms replication lag.",
+      "tags": [
+        "Database",
+        "Open Source",
+        "PostgreSQL"
+      ],
+      "techStack": [
+        "PostgreSQL",
+        "Elixir",
+        "Docker",
+        "Go",
+        "TypeScript"
+      ],
+      "aiHealthScore": 88,
+      "aiSummary": "Steady expansion account. Enthusiastic open-source alignment and mutual community synergy.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "comp-4",
+      "name": "Raycast Technologies",
+      "domain": "raycast.com",
+      "tier": "Mid-Market",
+      "arr": 68000,
+      "dealCount": 1,
+      "city": "London",
+      "country": "UK",
+      "employees": 45,
+      "primaryContact": "Thomas Paul Mann",
+      "owner": "Elena Rostova",
+      "status": "Prospect",
+      "notes": "Piloting Nexus MCP server extensions for quick spotlight lookup.",
+      "tags": [
+        "Productivity",
+        "macOS",
+        "Extension Store"
+      ],
+      "techStack": [
+        "Swift",
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "aiHealthScore": 82,
+      "aiSummary": "Trial period underway; champion has requested keyboard shortcuts and API token provisioning.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "comp-5",
+      "name": "Retool Corp",
+      "domain": "retool.com",
+      "tier": "Enterprise",
+      "arr": 190000,
+      "dealCount": 2,
+      "city": "San Francisco",
+      "country": "USA",
+      "employees": 380,
+      "primaryContact": "David Hsu",
+      "owner": "Alex Vance",
+      "status": "Churn Risk",
+      "notes": "Internal champion departed company; executive outreach meeting scheduled for Friday to present tailored retention terms.",
+      "tags": [
+        "Internal Tools",
+        "Low-Code",
+        "Enterprise"
+      ],
+      "techStack": [
+        "Node.js",
+        "React",
+        "Kubernetes",
+        "PostgreSQL"
+      ],
+      "aiHealthScore": 46,
+      "aiSummary": "Critical churn risk due to champion turnover. Immediate executive touchpoint and tailored roadmap review required.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "comp-6",
+      "name": "Resend Inc.",
+      "domain": "resend.com",
+      "tier": "Growth",
+      "arr": 55000,
+      "dealCount": 1,
+      "city": "San Francisco",
+      "country": "USA",
+      "employees": 22,
+      "primaryContact": "Zeno Rocha",
+      "owner": "Sarah Miller",
+      "status": "Active",
+      "notes": "High engagement with transactional email webhooks and automated workflow notifications.",
+      "tags": [
+        "Email",
+        "Developer Tools",
+        "Growth"
+      ],
+      "techStack": [
+        "React Email",
+        "TypeScript",
+        "Node.js",
+        "Cloudflare"
+      ],
+      "aiHealthScore": 95,
+      "aiSummary": "Outstanding NPS and rapid growth. Ready for expansion tier upsell next quarter.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "comp-1791043414266-1",
+      "workspaceId": "ws-1791043414266",
+      "name": "Linear Systems",
+      "domain": "linear.app",
+      "tier": "Enterprise",
+      "arr": 145000,
+      "dealCount": 1,
+      "city": "San Francisco",
+      "country": "USA",
+      "employees": 84,
+      "primaryContact": "Karri Saarinen",
+      "owner": "Toxicdeepak",
+      "status": "Active",
+      "notes": "Dedicated account provisioned for verified user Toxicdeepak (toxicdeepak99@gmail.com).",
+      "tags": [
+        "SaaS",
+        "Developer Tools"
+      ],
+      "techStack": [
+        "TypeScript",
+        "GraphQL",
+        "PostgreSQL",
+        "React"
+      ],
+      "aiHealthScore": 94
+    },
+    {
+      "id": "comp-1791043448174-1",
+      "workspaceId": "ws-1791043448174",
+      "name": "Linear Systems",
+      "domain": "linear.app",
+      "tier": "Enterprise",
+      "arr": 145000,
+      "dealCount": 1,
+      "city": "San Francisco",
+      "country": "USA",
+      "employees": 84,
+      "primaryContact": "Karri Saarinen",
+      "owner": "Deepak Goel",
+      "status": "Active",
+      "notes": "Dedicated account provisioned for verified user Deepak Goel (goeldeepak747@gmail.com).",
+      "tags": [
+        "SaaS",
+        "Developer Tools"
+      ],
+      "techStack": [
+        "TypeScript",
+        "GraphQL",
+        "PostgreSQL",
+        "React"
+      ],
+      "aiHealthScore": 94
+    }
+  ],
+  "opportunities": [
+    {
+      "id": "deal-1",
+      "title": "Linear — Global Workspace Expansion",
+      "companyId": "comp-1",
+      "companyName": "Linear Systems",
+      "amount": 90000,
+      "stage": "negotiation",
+      "probability": 80,
+      "closeDate": "2026-10-31",
+      "owner": "Alex Vance",
+      "aiRisk": "Contract redlines on indemnification terms pending final legal review.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "deal-2",
+      "title": "Vercel — Enterprise Edge Integration",
+      "companyId": "comp-2",
+      "companyName": "Vercel Inc.",
+      "amount": 140000,
+      "stage": "proposal",
+      "probability": 60,
+      "closeDate": "2026-11-15",
+      "owner": "Sarah Miller",
+      "aiRisk": "Competitor offering aggressive bundle pricing; highlight our sub-50ms latency and data sovereignty.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "deal-3",
+      "title": "Supabase — DB Sync Connector",
+      "companyId": "comp-3",
+      "companyName": "Supabase Inc.",
+      "amount": 45000,
+      "stage": "qualified",
+      "probability": 40,
+      "closeDate": "2026-11-30",
+      "owner": "David Kim",
+      "aiRisk": "Technical spike underway for real-time replication connector.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "deal-4",
+      "title": "Raycast — Spotlight Extension Licensing",
+      "companyId": "comp-4",
+      "companyName": "Raycast Technologies",
+      "amount": 32000,
+      "stage": "prospect",
+      "probability": 25,
+      "closeDate": "2026-12-15",
+      "owner": "Elena Rostova",
+      "aiRisk": "Early discovery stage; awaiting pilot user feedback.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "deal-5",
+      "title": "Retool — Platform Renewal & Retention",
+      "companyId": "comp-5",
+      "companyName": "Retool Corp",
+      "amount": 190000,
+      "stage": "negotiation",
+      "probability": 50,
+      "closeDate": "2026-10-25",
+      "owner": "Alex Vance",
+      "aiRisk": "Needs immediate executive touchpoint before Q4 procurement lock.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "deal-6",
+      "title": "Resend — Automated Email Pipeline",
+      "companyId": "comp-6",
+      "companyName": "Resend Inc.",
+      "amount": 55000,
+      "stage": "won",
+      "probability": 100,
+      "closeDate": "2026-09-30",
+      "owner": "Sarah Miller",
+      "aiRisk": "Deal closed won. Onboarding workflow triggered.",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "deal-1791043414266-1",
+      "workspaceId": "ws-1791043414266",
+      "title": "Linear — Global Workspace Expansion",
+      "companyId": "comp-1791043414266-1",
+      "companyName": "Linear Systems",
+      "amount": 90000,
+      "stage": "negotiation",
+      "probability": 80,
+      "closeDate": "2026-10-31",
+      "owner": "Toxicdeepak"
+    },
+    {
+      "id": "deal-1791043448174-1",
+      "workspaceId": "ws-1791043448174",
+      "title": "Linear — Global Workspace Expansion",
+      "companyId": "comp-1791043448174-1",
+      "companyName": "Linear Systems",
+      "amount": 90000,
+      "stage": "negotiation",
+      "probability": 80,
+      "closeDate": "2026-10-31",
+      "owner": "Deepak Goel"
+    }
+  ],
+  "people": [
+    {
+      "id": "peo-1",
+      "name": "Karri Saarinen",
+      "email": "karri@linear.app",
+      "title": "Co-founder & CEO",
+      "companyId": "comp-1",
+      "companyName": "Linear Systems",
+      "phone": "+1 (415) 890-1200",
+      "status": "Champion",
+      "lastActivity": "2 hours ago",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "peo-2",
+      "name": "Guillermo Rauch",
+      "email": "rauchg@vercel.com",
+      "title": "CEO",
+      "companyId": "comp-2",
+      "companyName": "Vercel Inc.",
+      "phone": "+1 (415) 760-3490",
+      "status": "Executive Sponsor",
+      "lastActivity": "Yesterday",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "peo-3",
+      "name": "Paul Copplestone",
+      "email": "paul@supabase.com",
+      "title": "CEO & Co-founder",
+      "companyId": "comp-3",
+      "companyName": "Supabase Inc.",
+      "phone": "+65 6789 0123",
+      "status": "Champion",
+      "lastActivity": "3 days ago",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "peo-4",
+      "name": "Thomas Paul Mann",
+      "email": "thomas@raycast.com",
+      "title": "Co-founder & CEO",
+      "companyId": "comp-4",
+      "companyName": "Raycast Technologies",
+      "phone": "+44 20 7946 0991",
+      "status": "Lead",
+      "lastActivity": "5 days ago",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "peo-5",
+      "name": "David Hsu",
+      "email": "david@retool.com",
+      "title": "Founder & CEO",
+      "companyId": "comp-5",
+      "companyName": "Retool Corp",
+      "phone": "+1 (415) 555-0144",
+      "status": "Customer",
+      "lastActivity": "1 day ago",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "peo-6",
+      "name": "Zeno Rocha",
+      "email": "zeno@resend.com",
+      "title": "Founder & CEO",
+      "companyId": "comp-6",
+      "companyName": "Resend Inc.",
+      "phone": "+1 (415) 555-8833",
+      "status": "Champion",
+      "lastActivity": "4 hours ago",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "peo-1791043414266-1",
+      "workspaceId": "ws-1791043414266",
+      "name": "Karri Saarinen",
+      "email": "karri@linear.app",
+      "title": "Co-founder & CEO",
+      "companyId": "comp-1791043414266-1",
+      "companyName": "Linear Systems",
+      "phone": "+1 (415) 890-1200",
+      "status": "Champion",
+      "lastActivity": "Just now"
+    },
+    {
+      "id": "peo-1791043448174-1",
+      "workspaceId": "ws-1791043448174",
+      "name": "Karri Saarinen",
+      "email": "karri@linear.app",
+      "title": "Co-founder & CEO",
+      "companyId": "comp-1791043448174-1",
+      "companyName": "Linear Systems",
+      "phone": "+1 (415) 890-1200",
+      "status": "Champion",
+      "lastActivity": "Just now"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "tsk-1",
+      "title": "Schedule Q4 renewal check-in with Karri Saarinen",
+      "completed": false,
+      "dueDate": "Oct 15",
+      "assignedTo": "Alex Vance",
+      "priority": "high",
+      "relatedEntity": "Linear Systems",
+      "entityId": "comp-1",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "tsk-2",
+      "title": "Review enterprise SOC2 security whitepaper redlines",
+      "completed": false,
+      "dueDate": "Oct 18",
+      "assignedTo": "Sarah Miller",
+      "priority": "medium",
+      "relatedEntity": "Vercel Inc.",
+      "entityId": "comp-2",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "tsk-3",
+      "title": "Test PostgreSQL replication latency in staging cluster",
+      "completed": true,
+      "dueDate": "Oct 10",
+      "assignedTo": "David Kim",
+      "priority": "low",
+      "relatedEntity": "Supabase Inc.",
+      "entityId": "comp-3",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "tsk-4",
+      "title": "Executive outreach meeting with Retool leadership",
+      "completed": false,
+      "dueDate": "Tomorrow",
+      "assignedTo": "Alex Vance",
+      "priority": "urgent",
+      "relatedEntity": "Retool Corp",
+      "entityId": "comp-5",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "tsk-1791043414266-1",
+      "workspaceId": "ws-1791043414266",
+      "title": "Welcome Toxicdeepak! Explore your pipeline and run AI Company Enrichment.",
+      "completed": false,
+      "dueDate": "Today",
+      "assignedTo": "Toxicdeepak",
+      "priority": "high",
+      "relatedEntity": "Linear Systems",
+      "entityId": "comp-1791043414266-1"
+    },
+    {
+      "id": "tsk-1791043448174-1",
+      "workspaceId": "ws-1791043448174",
+      "title": "Welcome Deepak Goel! Explore your pipeline and run AI Company Enrichment.",
+      "completed": false,
+      "dueDate": "Today",
+      "assignedTo": "Deepak Goel",
+      "priority": "high",
+      "relatedEntity": "Linear Systems",
+      "entityId": "comp-1791043448174-1"
+    }
+  ],
+  "activities": [
+    {
+      "id": "act-1",
+      "companyId": "comp-1",
+      "type": "meeting",
+      "title": "Q4 Pricing & Roadmap Strategy Sync",
+      "description": "Reviewed multi-seat enterprise discounts and planned automated onboarding workflow for the engineering team.",
+      "timestamp": "2 hours ago",
+      "author": "Alex Vance",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "act-2",
+      "companyId": "comp-5",
+      "type": "email",
+      "title": "Renewal Notice & Executive Check-in",
+      "description": "Sent follow-up proposal with tailored VIP support SLA and dedicated solution engineer assignment.",
+      "timestamp": "Yesterday",
+      "author": "Sarah Miller",
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "act-3",
+      "companyId": "comp-6",
+      "type": "stage_change",
+      "title": "Opportunity Won: $55,000",
+      "description": "Deal closed won. Onboarding webhook fired and Slack notification dispatched.",
+      "timestamp": "3 days ago",
+      "author": "System Automations",
+      "workspaceId": "ws-demo"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "wf-1",
+      "name": "Auto-Create Onboarding Task on Closed Won",
+      "trigger": "deal.stage_changed === 'won'",
+      "action": "create_task && send_notification",
+      "enabled": true,
+      "executionCount": 42,
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "wf-2",
+      "name": "Alert Account Executive on High Churn Risk",
+      "trigger": "company.aiHealthScore < 50",
+      "action": "urgent_slack_alert && schedule_meeting",
+      "enabled": true,
+      "executionCount": 18,
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "wf-3",
+      "name": "Auto-Enrich Inbound Accounts with Gemini",
+      "trigger": "company.created",
+      "action": "call_gemini_enrichment && update_tags",
+      "enabled": true,
+      "executionCount": 139,
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "wf-1791043414266-1",
+      "workspaceId": "ws-1791043414266",
+      "name": "Auto-Create Onboarding Task on Closed Won",
+      "trigger": "deal.stage_changed === 'won'",
+      "action": "create_task && send_notification",
+      "enabled": true,
+      "executionCount": 0
+    },
+    {
+      "id": "wf-1791043448174-1",
+      "workspaceId": "ws-1791043448174",
+      "name": "Auto-Create Onboarding Task on Closed Won",
+      "trigger": "deal.stage_changed === 'won'",
+      "action": "create_task && send_notification",
+      "enabled": true,
+      "executionCount": 0
+    }
+  ],
+  "customObjects": [
+    {
+      "id": "co-1",
+      "name": "Contracts",
+      "slug": "contracts",
+      "description": "Enterprise MSAs, NDAs, and Order Forms",
+      "fields": [
+        "contract_value",
+        "effective_date",
+        "expiry_date",
+        "signer_email",
+        "status"
+      ],
+      "workspaceId": "ws-demo"
+    },
+    {
+      "id": "co-2",
+      "name": "Hardware Subscriptions",
+      "slug": "hardware_subscriptions",
+      "description": "Physical terminal deployments and license keys",
+      "fields": [
+        "serial_number",
+        "device_model",
+        "firmware_version",
+        "warranty_end"
+      ],
+      "workspaceId": "ws-demo"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr-demo",
+      "name": "Alex Vance",
+      "email": "demo@nexus.corp",
+      "password": "password123",
+      "workspaceId": "ws-demo",
+      "role": "Admin / VP of Sales",
+      "createdAt": "2026-10-03T16:01:34.265Z"
+    },
+    {
+      "id": "usr-1791043414266",
+      "name": "Toxicdeepak",
+      "email": "toxicdeepak99@gmail.com",
+      "avatar": "https://lh3.googleusercontent.com/a/ACg8ocL_wxbotG7JsZapaTVgv_XBYQjAH4a6zh_NKcdO8XEqSE2z9g=s96-c",
+      "googleId": "113529613003197384313",
+      "password": "sso_google_managed",
+      "workspaceId": "ws-1791043414266",
+      "role": "Admin / Owner",
+      "createdAt": "2026-10-03T16:03:34.266Z"
+    },
+    {
+      "id": "usr-1791043448174",
+      "name": "Deepak Goel",
+      "email": "goeldeepak747@gmail.com",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Deepak",
+      "googleId": "111524399571002014093",
+      "password": "sso_google_managed",
+      "workspaceId": "ws-1791043448174",
+      "role": "Admin / Owner",
+      "createdAt": "2026-10-03T16:04:08.174Z"
+    }
+  ],
+  "workspaces": [
+    {
+      "id": "ws-demo",
+      "name": "Acme Systems (Demo Workspace)",
+      "ownerId": "usr-demo",
+      "createdAt": "2026-10-03T16:01:34.264Z"
+    },
+    {
+      "id": "ws-1791043414266",
+      "name": "Deepak's Workspace",
+      "ownerId": "usr-1791043414266",
+      "createdAt": "2026-10-03T16:03:34.266Z"
+    },
+    {
+      "id": "ws-1791043448174",
+      "name": "Deepak's Workspace",
+      "ownerId": "usr-1791043448174",
+      "createdAt": "2026-10-03T16:04:08.174Z"
+    }
+  ]
+}

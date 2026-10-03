@@ -1,0 +1,6 @@
+{
+  "name": "Nexus — The Open-Source CRM",
+  "description": "The modern open-source CRM alternative to Salesforce. High performance, full data ownership, keyboard-first navigation, and extensible architecture.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
