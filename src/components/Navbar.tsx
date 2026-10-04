@@ -49,7 +49,7 @@ export function Navbar({ onOpenDemo, onOpenCommand, onNavigate, isDark, onToggle
         </div>
 
         {/* Zone 2: Navigation Links with uppercase tracking & vertical dividers '|' as seen in screenshot */}
-        <nav className="hidden md:flex items-center gap-4 text-[11px] font-bold tracking-widest uppercase text-neutral-600 dark:text-neutral-400">
+        <nav className="hidden lg:flex items-center gap-4 text-[11px] font-bold tracking-widest uppercase text-neutral-600 dark:text-neutral-400">
           {/* PRODUCT DROPDOWN */}
           <div 
             className="relative"
@@ -215,7 +215,7 @@ export function Navbar({ onOpenDemo, onOpenCommand, onNavigate, isDark, onToggle
         </nav>
 
         {/* Zone 3: Primary Actions (GitHub link, Log In, Get Started, Theme Toggle) */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           {/* GitHub Link */}
           <a
             href="https://github.com"
@@ -263,7 +263,7 @@ export function Navbar({ onOpenDemo, onOpenCommand, onNavigate, isDark, onToggle
         </div>
 
         {/* Mobile menu trigger */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex lg:hidden items-center gap-2">
           <button
             onClick={onToggleTheme}
             className="p-1.5 rounded border border-neutral-200 dark:border-white/10 text-neutral-500"
@@ -282,7 +282,7 @@ export function Navbar({ onOpenDemo, onOpenCommand, onNavigate, isDark, onToggle
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-neutral-200 dark:border-white/10 bg-white dark:bg-[#0c0d0e] px-4 py-4 space-y-3">
+        <div className="lg:hidden border-b border-neutral-200 dark:border-white/10 bg-white dark:bg-[#0c0d0e] px-4 py-4 space-y-3">
           <button
             onClick={() => {
               setMobileMenuOpen(false);
@@ -340,6 +340,15 @@ export function Navbar({ onOpenDemo, onOpenCommand, onNavigate, isDark, onToggle
             Pricing
           </a>
           <div className="pt-3 border-t border-neutral-200 dark:border-white/10 flex flex-col gap-2">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onNavigate('workspace');
+              }}
+              className="w-full rounded-md border border-purple-500/40 bg-purple-500/10 py-2 text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300 text-center"
+            >
+              Open CRM Workspace
+            </button>
             <button
               onClick={() => {
                 setMobileMenuOpen(false);

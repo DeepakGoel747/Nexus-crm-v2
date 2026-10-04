@@ -41,14 +41,6 @@ export function LoginPage({ onBackToHome, onLoginSuccess, isDark }: LoginPagePro
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(true);
 
-  // Quick fill demo account
-  const handleFillDemo = () => {
-    setTab('login');
-    setEmail('demo@nexus.corp');
-    setPassword('password123');
-    setErrorMsg(null);
-  };
-
   // Submit Handler: Real API Request
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,7 +90,7 @@ export function LoginPage({ onBackToHome, onLoginSuccess, isDark }: LoginPagePro
       isDark ? 'bg-[#090a0b] text-[#ededed]' : 'bg-[#faf9f6] text-[#141518]'
     }`}>
       {/* Top Bar */}
-      <header className="px-6 py-5 flex items-center justify-between border-b border-neutral-200 dark:border-white/[0.08]">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-4 py-4 dark:border-white/[0.08] sm:px-6 sm:py-5">
         <button
           onClick={onBackToHome}
           className="flex items-center gap-2 text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
@@ -123,7 +115,7 @@ export function LoginPage({ onBackToHome, onLoginSuccess, isDark }: LoginPagePro
 
       {/* Main Form Card */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 my-6">
-        <div className="w-full max-w-md rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0f1014] p-6 sm:p-8 shadow-xl">
+        <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl dark:border-neutral-800 dark:bg-[#0f1014] sm:p-8">
           {/* Header Switcher: Sign In vs Create Workspace */}
           <div className="flex rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-white/[0.04] p-1 mb-6 text-xs font-bold">
             <button
@@ -203,7 +195,7 @@ export function LoginPage({ onBackToHome, onLoginSuccess, isDark }: LoginPagePro
               <div className="text-left">
                 <span className="block leading-tight">Continue with Google</span>
                 <span className="text-[10px] text-neutral-400 font-normal font-mono block">
-                  Quick sign in with your Google account
+                  Secure sign in with your Google account
                 </span>
               </div>
             </button>
@@ -319,18 +311,6 @@ export function LoginPage({ onBackToHome, onLoginSuccess, isDark }: LoginPagePro
             </button>
           </form>
 
-          {/* Demo account quick fill button */}
-          {tab === 'login' && (
-            <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-800 text-center">
-              <button
-                type="button"
-                onClick={handleFillDemo}
-                className="text-xs text-purple-600 dark:text-purple-400 hover:underline font-semibold cursor-pointer"
-              >
-                ⚡ Quick Test: Fill Default Demo Account (demo@nexus.corp)
-              </button>
-            </div>
-          )}
         </div>
       </main>
 

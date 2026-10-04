@@ -42,8 +42,8 @@ export function DocsPage({ onBackToHome, isDark }: DocsPageProps) {
       isDark ? 'bg-[#090a0b] text-[#ededed]' : 'bg-[#faf9f6] text-[#141518]'
     }`}>
       {/* Top Docs Header */}
-      <header className="sticky top-0 z-30 border-b border-neutral-200 dark:border-white/[0.08] bg-white/90 dark:bg-[#090a0b]/85 backdrop-blur-md px-6 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <header className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 bg-white/90 px-3 py-3.5 backdrop-blur-md dark:border-white/[0.08] dark:bg-[#090a0b]/85 sm:px-6">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-4">
           <button
             onClick={onBackToHome}
             className="flex items-center gap-1.5 text-xs font-semibold text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
@@ -71,7 +71,7 @@ export function DocsPage({ onBackToHome, isDark }: DocsPageProps) {
       </header>
 
       {/* Docs Body with Left Sidebar */}
-      <div className="flex-1 mx-auto max-w-7xl w-full flex">
+      <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-1">
         {/* Left Navigation Sidebar */}
         <aside className="w-64 border-r border-neutral-200 dark:border-white/[0.08] p-6 hidden md:block shrink-0">
           <div className="space-y-1 text-xs">
@@ -113,7 +113,7 @@ export function DocsPage({ onBackToHome, isDark }: DocsPageProps) {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-6 sm:p-12 max-w-4xl">
+        <main className="w-full min-w-0 max-w-4xl flex-1 p-4 sm:p-12">
           {activeSection === 'quickstart' && (
             <div className="space-y-6">
               <div>

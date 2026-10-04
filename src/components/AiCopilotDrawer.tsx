@@ -16,6 +16,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { Company, Deal } from '../types/crm';
+import { MarkdownText } from './MarkdownText';
 
 interface AiCopilotDrawerProps {
   isOpen: boolean;
@@ -82,15 +83,22 @@ export function AiCopilotDrawer({
     setIsLoading(true);
 
     try {
-      // 1. Try server-side Gemini endpoint
+      // 1. Try server-side Gemini endpoint (authenticated — the API requires a Bearer token)
+      const authToken = localStorage.getItem('nexus_token');
       const response = await fetch('/api/ai/copilot', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        },
         body: JSON.stringify({ message: textToSend }),
       });
 
       if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
+        const errData: any = await response.json().catch(() => ({}));
+        const serverError: any = new Error(errData.error || `AI request failed (${response.status}).`);
+        serverError.isServerError = true;
+        throw serverError;
       }
 
       const data = await response.json();
@@ -102,6 +110,17 @@ export function AiCopilotDrawer({
       };
       setMessages((prev) => [...prev, aiMsg]);
     } catch (err: any) {
+      if (err && err.isServerError) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `ai-${Date.now()}`,
+            sender: 'ai',
+            text: `### \u26a0\ufe0f AI request failed\n\n${err.message}`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          },
+        ]);
+      } else {
       console.warn('Falling back to local intelligent synthesis:', err);
       // High-craft contextual response generator
       let replyText = '';
@@ -126,6 +145,7 @@ export function AiCopilotDrawer({
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, aiMsg]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -142,15 +162,22 @@ export function AiCopilotDrawer({
     setMessages((prev) => [...prev, userMsg]);
 
     try {
+      const enrichToken = localStorage.getItem('nexus_token');
       const res = await fetch('/api/ai/enrich-company', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(enrichToken ? { Authorization: `Bearer ${enrichToken}` } : {}),
+        },
         body: JSON.stringify({ domain: company.domain, companyName: company.name }),
       });
       const data = await res.json();
+      if (!res.ok || !data.enriched) {
+        throw new Error(data.error || `AI enrichment failed (${res.status}).`);
+      }
       const enriched = data.enriched;
 
-      if (onEnrichCompany && enriched) {
+      if (onEnrichCompany) {
         onEnrichCompany(company.id, enriched);
       }
 
@@ -165,8 +192,16 @@ export function AiCopilotDrawer({
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
-    } catch {
-      handleSend(`Enrich ${company.name}`);
+    } catch (enrichErr: any) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `ai-${Date.now()}`,
+          sender: 'ai',
+          text: `### \u26a0\ufe0f Enrichment failed\n\n${enrichErr?.message || 'Unable to enrich this company.'}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -250,8 +285,8 @@ export function AiCopilotDrawer({
                     : 'bg-neutral-100 dark:bg-white/[0.04] border border-neutral-200 dark:border-white/10 text-neutral-800 dark:text-neutral-200'
                 }`}
               >
-                <div className="prose prose-xs dark:prose-invert max-w-none whitespace-pre-wrap">
-                  {m.text}
+                <div className="max-w-none">
+                  {isUser ? <span className="whitespace-pre-wrap">{m.text}</span> : <MarkdownText text={m.text} />}
                 </div>
 
                 {!isUser && (
