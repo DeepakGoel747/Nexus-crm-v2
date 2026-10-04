@@ -25,11 +25,33 @@ export function ExportToAiCoderModal({
 }: ExportToAiCoderModalProps) {
   const [activeTab, setActiveTab] = useState<'cursor' | 'claude' | 'cli' | 'json'>('cursor');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState('');
 
   if (!isOpen) return null;
 
   const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
   const mcpUrl = `${currentOrigin}/api/ai/mcp`;
+
+  // Authenticated backup download — a plain <a href> cannot send the Bearer token.
+  const handleDownloadDatabase = async () => {
+    setDownloadError('');
+    try {
+      const token = localStorage.getItem('nexus_token');
+      const response = await fetch('/api/export/full-database', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) throw new Error('Backup download failed. Sign in and try again.');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${workspaceName.trim().toLowerCase().replace(/\s+/g, '_') || 'nexus'}_backup.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setDownloadError(err instanceof Error ? err.message : 'Backup download failed.');
+    }
+  };
 
   const cursorConfig = JSON.stringify(
     {
@@ -258,15 +280,18 @@ cursor .`;
                   <p className="text-[11px] text-neutral-500">Includes all entities, custom fields, and AI enrichment history</p>
                 </div>
 
-                <a
-                  href="/api/export/full-database"
-                  download
-                  className="rounded-lg bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 font-bold px-4 py-2 flex items-center gap-1.5 shadow-sm hover:opacity-90"
+                <button
+                  type="button"
+                  onClick={handleDownloadDatabase}
+                  className="rounded-lg bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 font-bold px-4 py-2 flex items-center gap-1.5 shadow-sm hover:opacity-90 cursor-pointer"
                 >
                   <Download className="h-3.5 w-3.5" />
                   <span>Download JSON</span>
-                </a>
+                </button>
               </div>
+              {downloadError && (
+                <p role="alert" className="text-[11px] text-red-600 dark:text-red-400">{downloadError}</p>
+              )}
             </div>
           )}
         </div>

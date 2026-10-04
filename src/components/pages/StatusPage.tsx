@@ -20,8 +20,8 @@ export function StatusPage({ onBackToHome, isDark }: StatusPageProps) {
       isDark ? 'bg-[#090a0b] text-[#ededed]' : 'bg-[#faf9f6] text-[#141518]'
     }`}>
       {/* Top Bar */}
-      <header className="sticky top-0 z-30 border-b border-neutral-200 dark:border-white/[0.08] bg-white/90 dark:bg-[#090a0b]/85 backdrop-blur-md px-6 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <header className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 bg-white/90 px-3 py-3.5 backdrop-blur-md dark:border-white/[0.08] dark:bg-[#090a0b]/85 sm:px-6">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-4">
           <button
             onClick={onBackToHome}
             className="flex items-center gap-1.5 text-xs font-semibold text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
@@ -33,14 +33,14 @@ export function StatusPage({ onBackToHome, isDark }: StatusPageProps) {
           <span className="text-xs font-bold text-neutral-900 dark:text-white">System Status</span>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+        <div className="flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           <span>All Systems Operational</span>
         </div>
       </header>
 
       {/* Main Status Dashboard */}
-      <main className="flex-1 mx-auto max-w-4xl w-full px-6 py-12 sm:py-16 space-y-8">
+      <main className="mx-auto w-full min-w-0 max-w-4xl flex-1 space-y-8 px-4 py-8 sm:px-6 sm:py-16">
         <div>
           <span className="text-xs font-mono text-neutral-500 uppercase tracking-wider block">
             Realtime Telemetry
@@ -54,7 +54,7 @@ export function StatusPage({ onBackToHome, isDark }: StatusPageProps) {
         </div>
 
         {/* Global Banner */}
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.05] p-5 flex items-center gap-3">
+        <div className="flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.05] p-4 sm:p-5">
           <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
           <div>
             <h3 className="text-sm font-bold text-neutral-950 dark:text-white">
@@ -68,7 +68,7 @@ export function StatusPage({ onBackToHome, isDark }: StatusPageProps) {
 
         {/* Services Table */}
         <div className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0f1014] overflow-hidden shadow-sm">
-          <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-100 px-4 py-4 dark:border-neutral-800 sm:px-6">
             <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500">
               Service Health
             </h3>
@@ -77,8 +77,8 @@ export function StatusPage({ onBackToHome, isDark }: StatusPageProps) {
 
           <div className="divide-y divide-neutral-100 dark:divide-neutral-800/60 text-xs">
             {systems.map((s, idx) => (
-              <div key={idx} className="px-6 py-4 flex items-center justify-between">
-                <div>
+              <div key={idx} className="flex flex-wrap items-center justify-between gap-2 px-4 py-4 sm:px-6">
+                <div className="min-w-0">
                   <h4 className="font-semibold text-neutral-900 dark:text-white">{s.name}</h4>
                   <span className="text-[11px] text-neutral-500 font-mono">Response: {s.latency}</span>
                 </div>
@@ -95,7 +95,7 @@ export function StatusPage({ onBackToHome, isDark }: StatusPageProps) {
         </div>
 
         {/* Past Incident History */}
-        <div className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0f1014] p-6 shadow-sm space-y-3">
+        <div className="space-y-3 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-[#0f1014] sm:p-6">
           <h3 className="text-sm font-bold text-neutral-900 dark:text-white">
             Past Incident History
           </h3>

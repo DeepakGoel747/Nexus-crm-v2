@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   Building2, 
   DollarSign, 
@@ -46,9 +46,16 @@ export function InteractiveCrmPreview({ onOpenCommand }: InteractiveCrmPreviewPr
   // Navigation & layout
   const [activeObject, setActiveObject] = useState<'companies' | 'opportunities' | 'people' | 'tasks'>('companies');
   const [dealsLayout, setDealsLayout] = useState<'kanban' | 'table'>('kanban');
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => window.matchMedia('(max-width: 639px)').matches);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showAiDrawer, setShowAiDrawer] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 639px)');
+    const updateSidebar = () => setIsSidebarCollapsed(mediaQuery.matches);
+    mediaQuery.addEventListener('change', updateSidebar);
+    return () => mediaQuery.removeEventListener('change', updateSidebar);
+  }, []);
 
   // Saved Views
   const [activeView, setActiveView] = useState<'all' | 'enterprise' | 'high_arr'>('all');
@@ -227,22 +234,22 @@ export function InteractiveCrmPreview({ onOpenCommand }: InteractiveCrmPreviewPr
   return (
     <section id="product-tour" className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 scroll-mt-20">
       {/* Section Kicker */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-5">
+      <div className="mb-6 flex flex-col justify-between gap-4 border-b border-neutral-200 pb-5 dark:border-white/[0.08] sm:flex-row sm:items-end">
         <div>
-          <div className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
             <span>Figma-Grade UI Canvas</span>
             <span>·</span>
             <span>Local-First React Engine</span>
           </div>
-          <h2 className="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          <h2 className="mt-1 text-2xl font-bold tracking-tight text-neutral-950 dark:text-white sm:text-3xl">
             The Complete Nexus CRM Interface
           </h2>
-          <p className="mt-1 text-sm text-neutral-400">
+          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
             A full-fidelity replica of Twenty CRM's frontend: collapsible navigation sidebar, saved views, custom columns, live multi-select, and GraphQL query inspector.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setShowAiDrawer(true)}
             className="flex items-center gap-1.5 rounded-md border border-purple-500/40 bg-purple-500/15 px-3 py-1.5 text-xs font-semibold text-purple-300 hover:bg-purple-500/25 transition-colors cursor-pointer shadow-sm"
@@ -263,11 +270,11 @@ export function InteractiveCrmPreview({ onOpenCommand }: InteractiveCrmPreviewPr
 
       {/* Main CRM Application Window */}
       <div
-        className={`relative overflow-hidden rounded-xl border border-white/15 bg-[#0b0c0f] shadow-2xl transition-all duration-300 ${
+        className={`relative min-w-0 overflow-hidden rounded-xl border border-white/15 bg-[#0b0c0f] shadow-2xl transition-all duration-300 ${
           isFullscreen ? 'fixed inset-4 z-50 rounded-xl overflow-hidden' : 'min-h-[620px]'
         }`}
       >
-        <div className="flex h-full min-h-[580px]">
+        <div className="flex h-full min-h-[580px] min-w-0">
           {/* 1. LEFT WORKSPACE SIDEBAR (Twenty CRM iconic sidebar) */}
           <aside
             className={`border-r border-white/[0.08] bg-[#090a0d] flex flex-col justify-between transition-all duration-200 ${
@@ -489,12 +496,12 @@ export function InteractiveCrmPreview({ onOpenCommand }: InteractiveCrmPreviewPr
           </aside>
 
           {/* 2. MAIN CRM CANVAS VIEWPORT */}
-          <main className="flex-1 flex flex-col min-w-0 bg-[#0c0d10]">
+          <main className="flex min-w-0 flex-1 flex-col bg-[#0c0d10]">
             {/* View Tabs & Action Bar */}
-            <div className="border-b border-white/[0.08] bg-[#0f1013] px-4 pt-2">
+            <div className="min-w-0 border-b border-white/[0.08] bg-[#0f1013] px-2 pt-2 sm:px-4">
               {/* Row 1: Saved View Tabs */}
-              <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-xs">
-                <div className="flex items-center gap-1">
+              <div className="flex min-w-0 items-center justify-between gap-2 border-b border-white/[0.06] pb-2 text-xs">
+                <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
                   <button
                     onClick={() => setActiveView('all')}
                     className={`px-3 py-1 rounded font-medium transition-colors ${
@@ -547,8 +554,8 @@ export function InteractiveCrmPreview({ onOpenCommand }: InteractiveCrmPreviewPr
               </div>
 
               {/* Row 2: Filter Toolbar */}
-              <div className="py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2 flex-1 max-w-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3 py-2.5 text-xs">
+                <div className="flex min-w-0 flex-1 items-center gap-2">
                   <div className="relative w-full">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500" />
                     <input
@@ -561,7 +568,7 @@ export function InteractiveCrmPreview({ onOpenCommand }: InteractiveCrmPreviewPr
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-end gap-2">
                   {/* Filter Popover Trigger */}
                   <div className="relative">
                     <button
@@ -573,7 +580,7 @@ export function InteractiveCrmPreview({ onOpenCommand }: InteractiveCrmPreviewPr
                       }`}
                     >
                       <FilterIcon className="h-3 w-3" />
-                      <span>Filter: {tierFilter === 'all' ? 'All Tiers' : tierFilter}</span>
+                      <span className="hidden sm:inline">Filter: {tierFilter === 'all' ? 'All Tiers' : tierFilter}</span>
                       <ChevronDown className="h-2.5 w-2.5" />
                     </button>
 
@@ -655,7 +662,7 @@ export function InteractiveCrmPreview({ onOpenCommand }: InteractiveCrmPreviewPr
                     className="flex items-center gap-1.5 rounded-md bg-white px-3 py-1 text-xs font-semibold text-neutral-950 hover:bg-neutral-200 transition-colors"
                   >
                     <Plus className="h-3.5 w-3.5" />
-                    <span>New Record</span>
+                    <span className="hidden sm:inline">New Record</span>
                   </button>
                 </div>
               </div>
@@ -689,7 +696,7 @@ export function InteractiveCrmPreview({ onOpenCommand }: InteractiveCrmPreviewPr
             <div className="flex-1 overflow-auto">
               {/* TAB 1: COMPANIES TABLE */}
               {activeObject === 'companies' && (
-                <table className="w-full text-left text-xs border-collapse">
+                <table className="min-w-max w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-white/[0.08] bg-white/[0.02] text-neutral-400 sticky top-0 bg-[#0c0d10] z-10">
                       <th className="py-2.5 px-3 w-8">
@@ -861,7 +868,7 @@ export function InteractiveCrmPreview({ onOpenCommand }: InteractiveCrmPreviewPr
 
               {/* TAB 3: PEOPLE */}
               {activeObject === 'people' && (
-                <table className="w-full text-left text-xs border-collapse">
+                <table className="min-w-max w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-white/[0.08] bg-white/[0.02] text-neutral-400 sticky top-0 bg-[#0c0d10]">
                       <th className="py-2.5 px-4 font-medium">Name</th>

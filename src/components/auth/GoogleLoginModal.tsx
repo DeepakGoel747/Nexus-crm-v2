@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   Lock,
-  ArrowRight,
 } from 'lucide-react';
 
 declare global {
@@ -31,8 +30,6 @@ interface GoogleLoginModalProps {
   defaultEmail?: string;
 }
 
-const CLIENT_ID = '127873301880-4gcc53sijg6o9gv36qhepocjbjej3iio.apps.googleusercontent.com';
-
 export function GoogleLoginModal({
   isOpen,
   onClose,
@@ -42,6 +39,16 @@ export function GoogleLoginModal({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [googleClientId, setGoogleClientId] = useState<string | null>(null);
+  const [googleSdkTimedOut, setGoogleSdkTimedOut] = useState(false);
+  const [googleConfigError, setGoogleConfigError] = useState<string | null>(null);
+  const [requiresOnboarding, setRequiresOnboarding] = useState(false);
+  const [onboardingToken, setOnboardingToken] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState('');
+  const [companyWebsite, setCompanyWebsite] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [companySize, setCompanySize] = useState('1-10');
+  const [country, setCountry] = useState('');
 
   const googleBtnContainerRef = useRef<HTMLDivElement | null>(null);
   // Keep latest onSuccess in a ref so the GIS callback always has current version
@@ -56,31 +63,84 @@ export function GoogleLoginModal({
       setErrorMsg(null);
       setSuccessMsg(null);
       setIsLoading(false);
+      setGoogleSdkTimedOut(false);
+      setGoogleClientId(null);
+      setIsGisReady(false);
+      setGoogleConfigError(null);
+      setRequiresOnboarding(false);
+      setOnboardingToken(null);
+      setCompanyName('');
+      setCompanyWebsite('');
+      setIndustry('');
+      setCompanySize('1-10');
+      setCountry('');
+
+      let isCurrent = true;
+      fetch('/api/auth/google/config')
+        .then(async (response) => {
+          if (!response.ok) throw new Error(`Google sign-in configuration request failed (${response.status}).`);
+          const data = await response.json();
+          if (!isCurrent) return;
+          const configuredClientId = typeof data?.clientId === 'string' ? data.clientId.trim() : null;
+          setGoogleClientId(configuredClientId);
+          if (!configuredClientId) {
+            setGoogleConfigError('Google OAuth is not configured. Add a Google OAuth Web client ID to the server environment and restart Nexus.');
+          }
+        })
+        .catch((error: unknown) => {
+          if (isCurrent) {
+            setGoogleClientId(null);
+            setGoogleConfigError(error instanceof Error ? error.message : 'Unable to load Google sign-in configuration.');
+          }
+        });
+
+      return () => {
+        isCurrent = false;
+      };
     }
   }, [isOpen]);
 
-  // Poll for Google Identity Services SDK
+  // Poll for Google Identity Services SDK and fall back gracefully if the client is not configured.
   useEffect(() => {
-    if (!isOpen) return;
-    let checkInterval: ReturnType<typeof setInterval>;
+    if (!isOpen || !googleClientId) return;
+
+    let checkInterval: ReturnType<typeof setInterval> | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     const checkGis = () => {
       if (window.google?.accounts?.id) {
         setIsGisReady(true);
-        clearInterval(checkInterval);
+        setGoogleSdkTimedOut(false);
+        if (checkInterval) clearInterval(checkInterval);
+        if (timeoutId) clearTimeout(timeoutId);
+        return true;
       }
+      return false;
     };
+
     checkGis();
     checkInterval = setInterval(checkGis, 300);
-    return () => clearInterval(checkInterval);
-  }, [isOpen]);
+    timeoutId = setTimeout(() => {
+      if (!checkGis()) {
+        setGoogleSdkTimedOut(true);
+        setIsGisReady(false);
+      }
+      if (checkInterval) clearInterval(checkInterval);
+    }, 2500);
+
+    return () => {
+      if (checkInterval) clearInterval(checkInterval);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isOpen, googleClientId]);
 
   // Render the official Google button
   useEffect(() => {
-    if (!isOpen || !isGisReady || !googleBtnContainerRef.current) return;
+    if (!isOpen || !isGisReady || !googleBtnContainerRef.current || !googleClientId) return;
 
     try {
       window.google!.accounts.id.initialize({
-        client_id: CLIENT_ID,
+        client_id: googleClientId,
         callback: handleGoogleCredentialResponse,
         auto_select: false,
         cancel_on_tap_outside: false,
@@ -99,10 +159,11 @@ export function GoogleLoginModal({
       });
     } catch (err: any) {
       console.error('GIS init error:', err);
-      setErrorMsg('Could not load Google Sign-In. Try the quick sign-in below.');
+      setErrorMsg('Could not load Google Sign-In. Close this dialog to use email and password, or configure Google OAuth.');
+      setGoogleSdkTimedOut(true);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, isGisReady]);
+  }, [isOpen, isGisReady, googleClientId]);
 
   if (!isOpen) return null;
 
@@ -112,14 +173,13 @@ export function GoogleLoginModal({
     console.log('[Nexus] GIS callback fired, credential present:', !!response?.credential);
 
     if (!response?.credential) {
-      // Google returned no credential — fall through to quick sign-in
-      setErrorMsg('Google did not return a credential. Use "Quick Sign-In" below instead.');
+      setErrorMsg('Google did not return a credential. Please try again or use email and password sign-in.');
       return;
     }
     doLogin({ credential: response.credential });
   };
 
-  // The actual login API call — works for real OAuth token OR dev fallback
+  // The API only accepts cryptographically verified Google ID tokens.
   const doLogin = async (payload: Record<string, string>) => {
     setIsLoading(true);
     setErrorMsg(null);
@@ -133,15 +193,20 @@ export function GoogleLoginModal({
       });
 
       const data = await res.json();
-      console.log('[Nexus] Auth response:', res.status, data?.user?.email);
-
       if (!res.ok) throw new Error(data.error || 'Authentication failed');
+      if (typeof data.token !== 'string' || !data.token) throw new Error('Google sign-in did not return a valid session. Please try again.');
 
       // Persist session
-      if (data.token) {
-        localStorage.setItem('nexus_token', data.token);
-        localStorage.setItem('nexus_user', JSON.stringify(data.user));
-        localStorage.setItem('nexus_workspace', JSON.stringify(data.workspace));
+      localStorage.setItem('nexus_token', data.token);
+      localStorage.setItem('nexus_user', JSON.stringify(data.user));
+      localStorage.setItem('nexus_workspace', JSON.stringify(data.workspace));
+
+      if (data.requiresOnboarding) {
+        setOnboardingToken(data.token);
+        setCompanyName('');
+        setRequiresOnboarding(true);
+        setIsLoading(false);
+        return;
       }
 
       const wsName = data.workspace?.name || `${data.user?.name || 'My'}'s Workspace`;
@@ -160,22 +225,48 @@ export function GoogleLoginModal({
     }
   };
 
-  // Quick dev / fallback sign-in — no Google popup needed
-  const handleQuickSignIn = () => {
-    doLogin({
-      email: 'goeldeepak747@gmail.com',
-      name: 'Deepak Goel',
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=Deepak`,
-      workspaceName: "Deepak's Workspace",
-    });
+  const handleOnboardingSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!onboardingToken) {
+      setErrorMsg('Your sign-in session is missing. Refresh this page and sign in again.');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMsg(null);
+    try {
+      const response = await fetch('/api/workspace/onboarding', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${onboardingToken}`,
+        },
+        body: JSON.stringify({ companyName, website: companyWebsite, industry, companySize, country }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to save your company profile.');
+
+      const savedUser = JSON.parse(localStorage.getItem('nexus_user') || '{}');
+      localStorage.setItem('nexus_user', JSON.stringify({ ...savedUser, workspaceName: data.workspace.name }));
+      localStorage.setItem('nexus_workspace', JSON.stringify(data.workspace));
+      setSuccessMsg(`Company profile saved. Welcome to ${data.workspace.name}!`);
+      setRequiresOnboarding(false);
+      setTimeout(() => {
+        onSuccessRef.current(data.workspace.name);
+        window.location.hash = 'workspace';
+      }, 600);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Unable to save your company profile.');
+      setIsLoading(false);
+    }
   };
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in"
-      onClick={(e) => { if (e.target === e.currentTarget && !isLoading) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget && !isLoading && !requiresOnboarding) onClose(); }}
     >
-      <div className="w-full max-w-[420px] rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111216] shadow-2xl overflow-hidden text-neutral-900 dark:text-neutral-100">
+      <div className="max-h-[90vh] w-full max-w-[420px] overflow-y-auto rounded-2xl border border-neutral-200 bg-white text-neutral-900 shadow-2xl dark:border-neutral-800 dark:bg-[#111216] dark:text-neutral-100">
 
         {/* ── Header ── */}
         <div className="p-5 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
@@ -193,7 +284,7 @@ export function GoogleLoginModal({
               <p className="text-xs text-neutral-500 mt-0.5">Continue to your Nexus CRM workspace</p>
             </div>
           </div>
-          {!isLoading && (
+          {!isLoading && !requiresOnboarding && (
             <button onClick={onClose} className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors cursor-pointer">
               <X className="h-4 w-4" />
             </button>
@@ -222,8 +313,44 @@ export function GoogleLoginModal({
           {isLoading ? (
             <div className="flex flex-col items-center gap-3 py-6">
               <RefreshCw className="h-6 w-6 animate-spin text-blue-500" />
-              <p className="text-sm text-neutral-500">Signing you in…</p>
+              <p className="text-sm text-neutral-500">{requiresOnboarding ? 'Saving your company profile…' : 'Signing you in…'}</p>
             </div>
+          ) : requiresOnboarding ? (
+            <form onSubmit={handleOnboardingSubmit} className="space-y-4">
+              <div>
+                <h4 className="text-sm font-semibold">Tell us about your company</h4>
+                <p className="mt-1 text-xs leading-relaxed text-neutral-500">
+                  This creates your workspace profile. Your CRM starts empty, without sample companies or deals.
+                </p>
+              </div>
+              <label className="block text-xs font-medium">
+                Company name *
+                <input required maxLength={100} autoFocus value={companyName} onChange={(event) => setCompanyName(event.target.value)} placeholder="Your company name" className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm dark:border-neutral-700 dark:bg-white/[0.04]" />
+              </label>
+              <label className="block text-xs font-medium">
+                Company website
+                <input type="url" value={companyWebsite} onChange={(event) => setCompanyWebsite(event.target.value)} placeholder="https://example.com" className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm dark:border-neutral-700 dark:bg-white/[0.04]" />
+              </label>
+              <label className="block text-xs font-medium">
+                Industry
+                <input maxLength={100} value={industry} onChange={(event) => setIndustry(event.target.value)} placeholder="e.g. Software, healthcare, retail" className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm dark:border-neutral-700 dark:bg-white/[0.04]" />
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block text-xs font-medium">
+                  Company size
+                  <select value={companySize} onChange={(event) => setCompanySize(event.target.value)} className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm dark:border-neutral-700 dark:bg-[#111216]">
+                    {['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+'].map((size) => <option key={size} value={size}>{size} employees</option>)}
+                  </select>
+                </label>
+                <label className="block text-xs font-medium">
+                  Country
+                  <input maxLength={100} value={country} onChange={(event) => setCountry(event.target.value)} placeholder="Country" className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm dark:border-neutral-700 dark:bg-white/[0.04]" />
+                </label>
+              </div>
+              <button type="submit" className="w-full rounded-lg bg-neutral-950 px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 dark:bg-white dark:text-neutral-950">
+                Create my workspace
+              </button>
+            </form>
           ) : (
             <>
               {/* Official Google Button */}
@@ -232,8 +359,23 @@ export function GoogleLoginModal({
                   Authenticate with Google
                 </p>
                 <div className="flex justify-center min-h-[44px]">
-                  {isGisReady ? (
+                  {isGisReady && googleClientId ? (
                     <div ref={googleBtnContainerRef} id="google-official-btn-slot" />
+                  ) : googleConfigError ? (
+                    <div className="w-full rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-left text-xs text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                      <p>{googleConfigError}</p>
+                      <p className="mt-2">
+                        In Google Cloud Console, create a Web application OAuth client and add this app’s origin to Authorized JavaScript origins. Put its client ID in <code className="font-mono">GOOGLE_CLIENT_ID</code> in <code className="font-mono">.env</code>, then restart Nexus.
+                      </p>
+                      <a className="mt-2 inline-block font-semibold underline" href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer">
+                        Open Google Cloud credentials
+                      </a>
+                      <p className="mt-2">Or close this dialog and sign in with your email and password.</p>
+                    </div>
+                  ) : googleSdkTimedOut ? (
+                    <div className="w-full rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-left text-xs text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                      Google Identity Services did not load. Check your network or browser extensions, then retry. You can also use email and password sign-in.
+                    </div>
                   ) : (
                     <div className="flex items-center gap-2 text-sm text-neutral-400">
                       <RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -243,27 +385,6 @@ export function GoogleLoginModal({
                 </div>
               </div>
 
-              {/* Divider */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1 border-t border-neutral-200 dark:border-neutral-800" />
-                <span className="text-[11px] text-neutral-400 font-mono uppercase">or</span>
-                <div className="flex-1 border-t border-neutral-200 dark:border-neutral-800" />
-              </div>
-
-              {/* Quick Sign-In fallback — always works */}
-              <button
-                onClick={handleQuickSignIn}
-                className="w-full flex items-center justify-between gap-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-white/[0.03] hover:bg-neutral-100 dark:hover:bg-white/[0.06] p-3.5 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shrink-0">D</div>
-                  <div className="text-left">
-                    <div className="text-sm font-semibold text-neutral-900 dark:text-white">Deepak Goel</div>
-                    <div className="text-xs text-neutral-500 font-mono">goeldeepak747@gmail.com</div>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-white transition-colors" />
-              </button>
             </>
           )}
 

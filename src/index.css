@@ -32,15 +32,27 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(15, 23, 42, 0.18);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(15, 23, 42, 0.3);
 }
 
 /* Smooth transitions */
 * {
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+.dark * {
   border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }

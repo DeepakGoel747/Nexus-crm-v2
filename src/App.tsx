@@ -30,8 +30,16 @@ export default function App() {
   const [isTrialOpen, setIsTrialOpen] = useState(false);
   const [trialPlan, setTrialPlan] = useState('Cloud');
   const [isCommandOpen, setIsCommandOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false); // Clean light mode matching Twenty rebrand screenshot
+  const [isDark, setIsDark] = useState(() => localStorage.getItem('nexus_theme') === 'dark');
   const [userNotification, setUserNotification] = useState<string | null>(null);
+
+  const toggleTheme = () => {
+    setIsDark((current) => {
+      const next = !current;
+      localStorage.setItem('nexus_theme', next ? 'dark' : 'light');
+      return next;
+    });
+  };
 
   // Sync with browser hash for intuitive navigation
   useEffect(() => {
@@ -121,7 +129,7 @@ export default function App() {
           window.location.hash = 'login';
         }}
         isDark={isDark}
-        onToggleTheme={() => setIsDark(!isDark)}
+        onToggleTheme={toggleTheme}
         onOpenCommand={() => setIsCommandOpen(true)}
       />
     );
@@ -202,7 +210,7 @@ export default function App() {
         onOpenCommand={() => setIsCommandOpen(true)}
         onNavigate={navigateTo}
         isDark={isDark}
-        onToggleTheme={() => setIsDark(!isDark)}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Hero Section */}
