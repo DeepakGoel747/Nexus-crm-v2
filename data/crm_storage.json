@@ -615,10 +615,10 @@
       "id": "usr-demo",
       "name": "Alex Vance",
       "email": "demo@nexus.corp",
-      "password": "password123",
       "workspaceId": "ws-demo",
       "role": "Admin / VP of Sales",
-      "createdAt": "2026-10-03T16:01:34.265Z"
+      "createdAt": "2026-10-03T16:01:34.265Z",
+      "passwordHash": "scrypt$lJMYNGs3YSGte0OXEvtOmA$Kmd7Zqea7IZKtz6vC0gDXY3aTLq5Hh9HhwT4g3Tw0Tg2jMEQD7FWvFK3bndlyt0fGubaHLv7NK067dtyvFg6pQ"
     },
     {
       "id": "usr-1791043414266",
@@ -626,10 +626,10 @@
       "email": "toxicdeepak99@gmail.com",
       "avatar": "https://lh3.googleusercontent.com/a/ACg8ocL_wxbotG7JsZapaTVgv_XBYQjAH4a6zh_NKcdO8XEqSE2z9g=s96-c",
       "googleId": "113529613003197384313",
-      "password": "sso_google_managed",
       "workspaceId": "ws-1791043414266",
       "role": "Admin / Owner",
-      "createdAt": "2026-10-03T16:03:34.266Z"
+      "createdAt": "2026-10-03T16:03:34.266Z",
+      "passwordHash": "scrypt$fD7-hUAp9jt8wLCkPMw_WQ$4YCuc0XZ9w2TsZYq1--En1L9muIdPO6uZ41P73NdaPDCxP8AJLYyHYQ47WkSjtcW_Z-5_sk-UrbGnRQOg4H71g"
     },
     {
       "id": "usr-1791043448174",
@@ -637,10 +637,10 @@
       "email": "goeldeepak747@gmail.com",
       "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Deepak",
       "googleId": "111524399571002014093",
-      "password": "sso_google_managed",
       "workspaceId": "ws-1791043448174",
       "role": "Admin / Owner",
-      "createdAt": "2026-10-03T16:04:08.174Z"
+      "createdAt": "2026-10-03T16:04:08.174Z",
+      "passwordHash": "scrypt$Wdt1h4T4MS3onDr79GGj2w$3ogTc12Fi7S0R3artywR3hvsEbdjGoIGjyDAM3vU9_dd2Za9fC5CFidslYhLjMmKrUCIXmr2EuCQSGUyp_lEPg"
     }
   ],
   "workspaces": [
@@ -662,5 +662,8 @@
       "ownerId": "usr-1791043448174",
       "createdAt": "2026-10-03T16:04:08.174Z"
     }
-  ]
+  ],
+  "meetings": [],
+  "notifications": [],
+  "trash": []
 }
