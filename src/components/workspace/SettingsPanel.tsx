@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   Blocks,
@@ -15,6 +15,7 @@ import {
   Mail,
   MessageCircle,
   Plug,
+  RefreshCw,
   Save,
   Settings2,
   UserRound,
@@ -182,6 +183,85 @@ export function SettingsPanel({
   onOpenMcpSetup,
 }: SettingsPanelProps) {
   const [section, setSection] = useState<SectionId>('general');
+  const [gmailStatus, setGmailStatus] = useState<{ connected: boolean; configured: boolean; email: string | null; importedCount: number; lastSyncAt: string | null } | null>(null);
+  const [gmailBusy, setGmailBusy] = useState(false);
+  const [gmailMessage, setGmailMessage] = useState('');
+
+  const apiHeaders = useMemo<Record<string, string>>(() => {
+    const headers: Record<string, string> = {};
+    const token = localStorage.getItem('nexus_token') || '';
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return headers;
+  }, []);
+
+  const loadGmailStatus = useCallback(async () => {
+    try {
+      const response = await fetch('/api/integrations/gmail/status', { headers: apiHeaders });
+      if (!response.ok) throw new Error('status failed');
+      setGmailStatus(await response.json());
+    } catch {
+      setGmailStatus({ connected: false, configured: false, email: null, importedCount: 0, lastSyncAt: null });
+    }
+  }, [apiHeaders]);
+
+  useEffect(() => {
+    if (section === 'apps') loadGmailStatus();
+  }, [section, loadGmailStatus]);
+
+  // Google redirects back with ?gmail=connected or ?gmail=error after consent.
+  useEffect(() => {
+    const hash = window.location.hash || '';
+    if (!hash.includes('gmail=')) return;
+    if (hash.includes('gmail=connected')) setGmailMessage('Gmail connected. Run a sync to import your messages.');
+    else if (hash.includes('gmail=error')) setGmailMessage('Gmail connection failed. Check the OAuth redirect URI matches this deployment origin.');
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#workspace`);
+    loadGmailStatus();
+  }, [loadGmailStatus]);
+
+  const gmailConnect = async () => {
+    setGmailBusy(true);
+    setGmailMessage('');
+    try {
+      const response = await fetch('/api/integrations/gmail/auth-url', { headers: apiHeaders });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not start the Gmail connection.');
+      window.location.href = data.url;
+    } catch (err: any) {
+      setGmailMessage(err?.message || 'Could not start the Gmail connection.');
+      setGmailBusy(false);
+    }
+  };
+
+  const gmailSync = async () => {
+    setGmailBusy(true);
+    setGmailMessage('');
+    try {
+      const response = await fetch('/api/integrations/gmail/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...apiHeaders },
+        body: JSON.stringify({ maxResults: 25 }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Gmail sync failed.');
+      setGmailMessage(data.message || 'Sync complete.');
+      await loadGmailStatus();
+    } catch (err: any) {
+      setGmailMessage(err?.message || 'Gmail sync failed.');
+    } finally {
+      setGmailBusy(false);
+    }
+  };
+
+  const gmailDisconnect = async () => {
+    setGmailBusy(true);
+    try {
+      await fetch('/api/integrations/gmail/disconnect', { method: 'POST', headers: apiHeaders });
+      setGmailMessage('Gmail disconnected.');
+      await loadGmailStatus();
+    } finally {
+      setGmailBusy(false);
+    }
+  };
   const [preferences, setPreferences] = useState<WorkspacePreferences>(defaultPreferences);
   const [members, setMembers] = useState<SettingsMember[]>([]);
   const [advanced, setAdvanced] = useState(false);
@@ -598,7 +678,49 @@ export function SettingsPanel({
           </div>
         );
       case 'apps':
-        return <SettingCard title="Applications" description="No application marketplace or installable connectors are configured in this Nexus build."><SettingRow title="Installed apps"><span className="text-xs text-neutral-500">No apps installed</span></SettingRow><SettingRow title="Developer applications"><span className="text-xs text-neutral-500">Not available</span></SettingRow></SettingCard>;
+        return (
+          <div className="space-y-4">
+            <SettingCard title="Gmail" description="Import your recent Gmail messages as activity records linked to matching contacts, so correspondence history appears alongside each deal. Read-only: Nexus never sends, edits, or deletes mail.">
+              {gmailStatus?.connected ? (
+                <>
+                  <SettingRow title="Connected mailbox">
+                    <span className="text-xs font-medium text-neutral-700 dark:text-neutral-200">{gmailStatus.email || 'connected'}</span>
+                  </SettingRow>
+                  <SettingRow title="Messages imported">
+                    <span className="text-xs text-neutral-500">{gmailStatus.importedCount || 0}</span>
+                  </SettingRow>
+                  <SettingRow title="Last sync">
+                    <span className="text-xs text-neutral-500">{gmailStatus.lastSyncAt ? new Date(gmailStatus.lastSyncAt).toLocaleString() : 'Never'}</span>
+                  </SettingRow>
+                </>
+              ) : (
+                <SettingRow title="Status">
+                  <span className="text-xs text-neutral-500">{gmailStatus === null ? 'Loading…' : gmailStatus.configured ? 'Not connected' : 'Server has no GOOGLE_CLIENT_ID configured'}</span>
+                </SettingRow>
+              )}
+              <SettingRow title="Actions">
+                <span className="flex items-center justify-end gap-2">
+                  {gmailStatus?.connected ? (
+                    <>
+                      <button type="button" onClick={gmailSync} disabled={gmailBusy} className="inline-flex items-center gap-1 rounded-md border border-neutral-200 px-2 py-1 text-xs font-medium hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-white/[0.06]">
+                        <RefreshCw className={`h-3.5 w-3.5 ${gmailBusy ? 'animate-spin' : ''}`} /> {gmailBusy ? 'Syncing…' : 'Sync now'}
+                      </button>
+                      <button type="button" onClick={gmailDisconnect} disabled={gmailBusy} className="rounded-md border border-neutral-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-700 dark:text-red-400">Disconnect</button>
+                    </>
+                  ) : (
+                    <button type="button" onClick={gmailConnect} disabled={gmailBusy} className="inline-flex items-center gap-1 rounded-md bg-neutral-900 px-2.5 py-1 text-xs font-medium text-white hover:bg-neutral-700 disabled:opacity-50 dark:bg-white dark:text-neutral-900">
+                      <Mail className="h-3.5 w-3.5" /> Connect Gmail
+                    </button>
+                  )}
+                </span>
+              </SettingRow>
+            </SettingCard>
+            {gmailMessage && <p className="text-xs text-neutral-600 dark:text-neutral-400">{gmailMessage}</p>}
+            <SettingCard title="Other applications" description="No application marketplace is configured in this Nexus build.">
+              <SettingRow title="Developer applications"><span className="text-xs text-neutral-500">Not available</span></SettingRow>
+            </SettingCard>
+          </div>
+        );
       case 'ai':
         return (
           <div className="space-y-4">

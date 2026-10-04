@@ -46,6 +46,26 @@ The full-stack application will run at:
 - **Web App & CRM Workspace**: `http://localhost:3000`
 - **REST & AI Endpoints**: `http://localhost:3000/api/*`
 
+### Gmail integration (import mail as CRM activity)
+
+Settings → Apps → Gmail connects a mailbox with Google OAuth and imports recent messages
+as activity records, matched to contacts by sender address so correspondence history sits
+next to the related account.
+
+Setup, all in the same Google Cloud OAuth client used for sign-in:
+
+1. Enable the **Gmail API** for your project.
+2. Add the exact redirect URI under **Authorized redirect URIs**:
+   `https://<your-deployment-host>/api/integrations/gmail/callback`
+   (`http://localhost:3000/api/integrations/gmail/callback` for local runs).
+3. Set `GOOGLE_CLIENT_SECRET` on the server. The client ID alone is not enough — the
+   authorization-code exchange needs the secret.
+4. Request only the `gmail.readonly` scope. Nexus never sends, edits, or deletes mail.
+
+The refresh token is encrypted at rest (AES-256-GCM) with a key derived from
+`SESSION_SECRET`, so it is never stored in plain text. Re-running a sync is safe:
+imported messages are tracked by Gmail message ID and are not duplicated.
+
 ### Deploy a live instance on Render
 
 Nexus serves the Vite development server locally. Production serves the built `dist` frontend from the Express server and requires PostgreSQL; it will refuse to start if the production database or session secret is missing.

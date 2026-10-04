@@ -3,7 +3,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'crypto';
+import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 import { Pool } from 'pg';
 
 dotenv.config();
@@ -445,6 +445,7 @@ app.use('/api', (req: Request, res: Response, next) => {
     'POST /auth/login',
     'GET /auth/google/config',
     'POST /auth/google',
+    'GET /integrations/gmail/callback',
   ]);
   if (publicRoutes.has(`${req.method} ${req.path.replace(/^\/api/, '')}`)) return next();
   const authContext = resolveAuthContext(req);
@@ -1788,6 +1789,310 @@ Return JSON with subject and body.`;
   } catch (err: any) {
     console.error('Email drafting error:', err);
     res.status(500).json({ error: 'Email generator failed: ' + err.message });
+  }
+});
+
+// ==========================================
+// GMAIL INTEGRATION (Google OAuth + Gmail API)
+// ==========================================
+// Imports a user's recent Gmail messages and logs them as activity records tied
+// to matching contacts, so a contact's correspondence history appears next to
+// their deals. Read-only scope; nothing is ever sent, modified, or deleted.
+
+const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
+const GMAIL_TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
+const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1';
+
+// OAuth state is single-use and short-lived. Guards the redirect against CSRF.
+const pendingGmailStates = new Map<string, { workspaceId: string; userId: string; expiresAt: number }>();
+
+// Refresh tokens are long-lived bearer credentials, so they are encrypted at rest
+// with a key derived from the session secret rather than stored as plaintext.
+function integrationKey() {
+  return createHash('sha256').update(`${SESSION_SECRET}:gmail-integration`).digest();
+}
+
+function encryptSecret(plaintext: string) {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', integrationKey(), iv);
+  const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+  return `${iv.toString('base64')}.${cipher.getAuthTag().toString('base64')}.${encrypted.toString('base64')}`;
+}
+
+function decryptSecret(payload: string) {
+  const [ivPart, tagPart, dataPart] = String(payload || '').split('.');
+  if (!ivPart || !tagPart || !dataPart) return null;
+  try {
+    const decipher = createDecipheriv('aes-256-gcm', integrationKey(), Buffer.from(ivPart, 'base64'));
+    decipher.setAuthTag(Buffer.from(tagPart, 'base64'));
+    return Buffer.concat([decipher.update(Buffer.from(dataPart, 'base64')), decipher.final()]).toString('utf8');
+  } catch {
+    return null;
+  }
+}
+
+function getGmailIntegration(workspace: any) {
+  return workspace?.integrations?.gmail || null;
+}
+
+function gmailClientId() {
+  return process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID || '';
+}
+
+// The redirect URI must exactly match what is registered in Google Cloud Console.
+function gmailRedirectUri(req: Request) {
+  const configured = process.env.APP_URL?.trim();
+  if (configured) return `${configured.replace(/\/$/, '')}/api/integrations/gmail/callback`;
+  const protocol = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  return `${protocol}://${host}/api/integrations/gmail/callback`;
+}
+
+async function refreshGmailAccessToken(workspace: any) {
+  const integration = getGmailIntegration(workspace);
+  if (!integration?.refreshTokenEnc) throw new Error('Gmail is not connected for this workspace.');
+  const refreshToken = decryptSecret(integration.refreshTokenEnc);
+  if (!refreshToken) throw new Error('The stored Gmail connection could not be decrypted. Please reconnect.');
+
+  const response = await fetch(GMAIL_TOKEN_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: gmailClientId(),
+      client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token',
+    }).toString(),
+  });
+  if (!response.ok) {
+    throw new Error(`Gmail token refresh failed (${response.status}). The connection may need to be re-authorised.`);
+  }
+  const token = await response.json() as { access_token: string };
+  return token.access_token;
+}
+
+function extractEmailAddress(headerValue: string) {
+  const match = String(headerValue || '').match(/<([^>]+)>/);
+  const raw = match ? match[1] : String(headerValue || '');
+  return raw.trim().toLowerCase();
+}
+
+// ---------------------------------------------------------------- Status ----
+app.get('/api/integrations/gmail/status', (req: Request, res: Response) => {
+  const { workspace } = getAuthContext(req);
+  const integration = getGmailIntegration(workspace);
+  res.json({
+    connected: Boolean(integration?.refreshTokenEnc),
+    configured: Boolean(gmailClientId()),
+    email: integration?.email || null,
+    connectedAt: integration?.connectedAt || null,
+    lastSyncAt: integration?.lastSyncAt || null,
+    importedCount: integration?.importedCount || 0,
+  });
+});
+
+// --------------------------------------------------------- Connect flow ----
+app.get('/api/integrations/gmail/auth-url', (req: Request, res: Response) => {
+  const { user, workspace } = getAuthContext(req);
+  const clientId = gmailClientId();
+  if (!clientId) {
+    return res.status(503).json({ error: 'Google sign-in is not configured. Set GOOGLE_CLIENT_ID on the server and restart.' });
+  }
+  if (!workspace?.id) {
+    return res.status(400).json({ error: 'Create a workspace before connecting Gmail.' });
+  }
+
+  const state = randomBytes(16).toString('hex');
+  pendingGmailStates.set(state, { workspaceId: workspace.id, userId: user?.id || '', expiresAt: Date.now() + 10 * 60 * 1000 });
+  // Drop expired states so the map cannot grow without bound.
+  for (const [key, value] of pendingGmailStates) {
+    if (value.expiresAt < Date.now()) pendingGmailStates.delete(key);
+  }
+
+  const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  url.searchParams.set('client_id', clientId);
+  url.searchParams.set('redirect_uri', gmailRedirectUri(req));
+  url.searchParams.set('response_type', 'code');
+  url.searchParams.set('scope', GMAIL_SCOPE);
+  url.searchParams.set('access_type', 'offline');
+  url.searchParams.set('prompt', 'consent');
+  url.searchParams.set('state', state);
+  res.json({ url: url.toString() });
+});
+
+// Browser redirect target, so it cannot carry an Authorization header.
+app.get('/api/integrations/gmail/callback', async (req: Request, res: Response) => {
+  const appUrl = (process.env.APP_URL?.trim() || `${req.headers['x-forwarded-proto'] || req.protocol}://${req.headers['x-forwarded-host'] || req.headers.host}`).replace(/\/$/, '');
+  const fail = (reason: string) => res.redirect(`${appUrl}/#workspace?gmail=error&reason=${encodeURIComponent(reason)}`);
+
+  const code = String(req.query.code || '');
+  const state = String(req.query.state || '');
+  if (!code || !state) return fail('missing_code_or_state');
+
+  const pending = pendingGmailStates.get(state);
+  pendingGmailStates.delete(state);
+  if (!pending) return fail('invalid_or_expired_state');
+  if (pending.expiresAt < Date.now()) return fail('expired_state');
+
+  const clientId = gmailClientId();
+  if (!clientId) return fail('google_not_configured');
+
+  try {
+    const tokenRes = await fetch(GMAIL_TOKEN_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+        redirect_uri: gmailRedirectUri(req),
+        grant_type: 'authorization_code',
+      }).toString(),
+    });
+    if (!tokenRes.ok) throw new Error('token_exchange_failed');
+    const tokens = await tokenRes.json() as { access_token: string; refresh_token?: string };
+    if (!tokens.refresh_token) throw new Error('no_refresh_token');
+
+    // Identify the connected mailbox so the UI can show which account is linked.
+    const profileRes = await fetch(`${GMAIL_API_BASE}/users/me/profile`, {
+      headers: { Authorization: `Bearer ${tokens.access_token}` },
+    });
+    const profile = await profileRes.json() as { emailAddress?: string };
+
+    const target = (db.workspaces || []).find((w: any) => w.id === pending.workspaceId);
+    if (!target) throw new Error('workspace_not_found');
+
+    target.integrations = target.integrations || {};
+    target.integrations.gmail = {
+      refreshTokenEnc: encryptSecret(tokens.refresh_token),
+      email: profile.emailAddress || 'connected mailbox',
+      connectedAt: new Date().toISOString(),
+      connectedBy: pending.userId,
+      lastSyncAt: null,
+      importedCount: 0,
+    };
+    if (!await saveDb(db, res)) return;
+
+    return res.redirect(`${appUrl}/#workspace?gmail=connected`);
+  } catch (err: any) {
+    console.error('Gmail OAuth callback error:', err);
+    return fail(String(err?.message || 'callback_failed'));
+  }
+});
+
+app.post('/api/integrations/gmail/disconnect', async (req: Request, res: Response) => {
+  const { workspace } = getAuthContext(req);
+  const target = (db.workspaces || []).find((w: any) => w.id === workspace?.id);
+  if (target?.integrations?.gmail) {
+    delete target.integrations.gmail;
+    if (!await saveDb(db, res)) return;
+  }
+  res.json({ status: 'success', connected: false });
+});
+
+// ------------------------------------------------------------ Sync emails ----
+app.post('/api/integrations/gmail/sync', async (req: Request, res: Response) => {
+  try {
+    const { workspace } = getAuthContext(req);
+    const target = (db.workspaces || []).find((w: any) => w.id === workspace?.id);
+    const integration = getGmailIntegration(target);
+    if (!integration?.refreshTokenEnc) {
+      return res.status(400).json({ error: 'Gmail is not connected for this workspace.' });
+    }
+
+    const requested = Number(req.body?.maxResults);
+    const maxResults = Number.isFinite(requested) && requested > 0 ? Math.min(requested, 100) : 25;
+    const accessToken = await refreshGmailAccessToken(target);
+
+    const listRes = await fetch(`${GMAIL_API_BASE}/users/me/messages?maxResults=${maxResults}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!listRes.ok) {
+      const detail = await listRes.text();
+      console.error('Gmail list error:', listRes.status, detail);
+      return res.status(502).json({ error: `Gmail returned ${listRes.status} while listing messages. Reconnect the account and retry.` });
+    }
+    const listing = await listRes.json() as { messages?: Array<{ id: string }> };
+    const messageIds = (listing.messages || []).map((m) => m.id).slice(0, maxResults);
+    if (!messageIds.length) {
+      return res.json({ status: 'success', imported: 0, matched: 0, unmatched: 0, skipped: 0, message: 'No messages found in this mailbox.' });
+    }
+
+    // Match sender addresses to known contacts so emails land on the right record.
+    const people = (db.people || []).filter((p: any) => p.workspaceId === workspace?.id);
+    const peopleByEmail = new Map<string, any>();
+    for (const person of people) {
+      const address = String(person.email || '').trim().toLowerCase();
+      if (address) peopleByEmail.set(address, person);
+    }
+    const companiesById = new Map<string, any>((db.companies || []).map((c: any) => [c.id, c] as [string, any]));
+    const alreadyImported = new Set(
+      (db.activities || [])
+        .filter((a: any) => a.gmailMessageId)
+        .map((a: any) => String(a.gmailMessageId)),
+    );
+
+    let imported = 0;
+    let matched = 0;
+    let unmatched = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (const messageId of messageIds) {
+      if (alreadyImported.has(messageId)) { skipped++; continue; }
+      try {
+        const msgRes = await fetch(`${GMAIL_API_BASE}/users/me/messages/${messageId}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!msgRes.ok) { errors.push(`message ${messageId}: ${msgRes.status}`); continue; }
+        const message = await msgRes.json() as any;
+
+        const headers = (message.payload?.headers || []) as Array<{ name: string; value: string }>;
+        const header = (name: string) => headers.find((h) => h.name?.toLowerCase() === name)?.value || '';
+        const fromHeader = header('from');
+        const senderEmail = extractEmailAddress(fromHeader);
+        const senderName = fromHeader.replace(/<[^>]+>/, '').replace(/["']/g, '').trim();
+        const subject = header('subject') || '(no subject)';
+        const contact = peopleByEmail.get(senderEmail);
+        if (contact) matched++; else unmatched++;
+
+        db.activities.unshift({
+          id: `act-gmail-${messageId}`,
+          workspaceId: workspace?.id,
+          companyId: contact?.companyId || (db.companies || [])[0]?.id,
+          personId: contact?.id || null,
+          type: 'email',
+          title: subject,
+          description: `${senderName || senderEmail} — ${String(message.snippet || '').replace(/\s+/g, ' ').trim()}`.trim(),
+          timestamp: new Date(Number(message.internalDate) || Date.now()).toLocaleString(),
+          author: senderName || senderEmail,
+          gmailMessageId: messageId,
+          contactEmail: senderEmail,
+          companyName: contact?.companyName || companiesById.get(contact?.companyId)?.name || null,
+        });
+        alreadyImported.add(messageId);
+        imported++;
+      } catch (err: any) {
+        errors.push(`message ${messageId}: ${err?.message || 'unknown error'}`);
+      }
+    }
+
+    integration.lastSyncAt = new Date().toISOString();
+    integration.importedCount = (integration.importedCount || 0) + imported;
+    if (!await saveDb(db, res)) return;
+
+    res.json({
+      status: 'success',
+      imported,
+      matched,
+      unmatched,
+      skipped,
+      errors: errors.slice(0, 5),
+      message: `Imported ${imported} message${imported === 1 ? '' : 's'}: ${matched} matched a contact, ${unmatched} unmatched, ${skipped} already imported.`,
+    });
+  } catch (err: any) {
+    console.error('Gmail sync error:', err);
+    res.status(500).json({ error: `Gmail sync failed: ${err?.message || 'unknown error'}` });
   }
 });
 
