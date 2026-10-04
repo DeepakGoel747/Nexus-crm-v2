@@ -504,6 +504,33 @@
   ],
   "activities": [
     {
+      "id": "act-1791138374248",
+      "workspaceId": "ws-demo",
+      "type": "note",
+      "title": "Account planning",
+      "description": "Sent follow-up with the security questionnaire and booked an executive sponsor call for next week.",
+      "timestamp": "Just now",
+      "author": "Alex Vance"
+    },
+    {
+      "id": "act-1791138372193",
+      "workspaceId": "ws-demo",
+      "type": "note",
+      "title": "Renewal risk",
+      "description": "Champion has gone quiet for 10 days. Scheduled executive outreach and confirmed renewal date for the QBR.",
+      "timestamp": "Just now",
+      "author": "Alex Vance"
+    },
+    {
+      "id": "act-1791138370085",
+      "workspaceId": "ws-demo",
+      "type": "note",
+      "title": "Contract update",
+      "description": "Legal returned redlines on the MSA; awaiting our counter-signature. Deal still on track for end of month.",
+      "timestamp": "Just now",
+      "author": "Alex Vance"
+    },
+    {
       "id": "act-1",
       "companyId": "comp-1",
       "type": "meeting",
@@ -663,7 +690,129 @@
       "createdAt": "2026-10-03T16:04:08.174Z"
     }
   ],
-  "meetings": [],
-  "notifications": [],
+  "meetings": [
+    {
+      "id": "mtg-1791138423369-s1zjr",
+      "workspaceId": "ws-demo",
+      "title": "Resend Monthly Expansion Check-in",
+      "startsAt": "2026-10-25T10:30:00.000Z",
+      "endsAt": "2026-10-25T11:15:00.000Z",
+      "attendees": "Resend Inc.",
+      "notes": "Demo meeting with Resend Inc..",
+      "createdBy": "Alex Vance",
+      "createdAt": "2026-10-04T18:27:03.369Z"
+    },
+    {
+      "id": "mtg-1791138421292-vc0c3",
+      "workspaceId": "ws-demo",
+      "title": "Raycast Discovery Call",
+      "startsAt": "2026-10-20T08:30:00.000Z",
+      "endsAt": "2026-10-20T09:15:00.000Z",
+      "attendees": "Raycast Technologies",
+      "notes": "Demo meeting with Raycast Technologies.",
+      "createdBy": "Alex Vance",
+      "createdAt": "2026-10-04T18:27:01.292Z"
+    },
+    {
+      "id": "mtg-1791138419228-gsrbh",
+      "workspaceId": "ws-demo",
+      "title": "Linear Contract Redline Walkthrough",
+      "startsAt": "2026-10-16T03:30:00.000Z",
+      "endsAt": "2026-10-16T04:15:00.000Z",
+      "attendees": "Linear Systems",
+      "notes": "Demo meeting with Linear Systems.",
+      "createdBy": "Alex Vance",
+      "createdAt": "2026-10-04T18:26:59.228Z"
+    },
+    {
+      "id": "mtg-1791138417178-558d6",
+      "workspaceId": "ws-demo",
+      "title": "Supabase Technical Deep Dive",
+      "startsAt": "2026-10-12T05:30:00.000Z",
+      "endsAt": "2026-10-12T06:15:00.000Z",
+      "attendees": "Supabase Inc.",
+      "notes": "Demo meeting with Supabase Inc..",
+      "createdBy": "Alex Vance",
+      "createdAt": "2026-10-04T18:26:57.178Z"
+    },
+    {
+      "id": "mtg-1791138415108-ule29",
+      "workspaceId": "ws-demo",
+      "title": "Retool Renewal Risk Review",
+      "startsAt": "2026-10-10T09:30:00.000Z",
+      "endsAt": "2026-10-10T10:15:00.000Z",
+      "attendees": "Retool Corp",
+      "notes": "Demo meeting with Retool Corp.",
+      "createdBy": "Alex Vance",
+      "createdAt": "2026-10-04T18:26:55.108Z"
+    },
+    {
+      "id": "mtg-1791138413058-emmbi",
+      "workspaceId": "ws-demo",
+      "title": "Q4 Pricing & Roadmap Strategy Sync",
+      "startsAt": "2026-10-09T04:30:00.000Z",
+      "endsAt": "2026-10-09T05:15:00.000Z",
+      "attendees": "Vercel Inc.",
+      "notes": "Demo meeting with Vercel Inc..",
+      "createdBy": "Alex Vance",
+      "createdAt": "2026-10-04T18:26:53.059Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "ntf-1791138423369-ejjlz",
+      "workspaceId": "ws-demo",
+      "title": "Meeting scheduled",
+      "message": "Resend Monthly Expansion Check-in is scheduled for 10/25/2026, 4:00:00 PM.",
+      "type": "meeting",
+      "createdAt": "2026-10-04T18:27:03.369Z",
+      "read": false
+    },
+    {
+      "id": "ntf-1791138421292-7egmb",
+      "workspaceId": "ws-demo",
+      "title": "Meeting scheduled",
+      "message": "Raycast Discovery Call is scheduled for 10/20/2026, 2:00:00 PM.",
+      "type": "meeting",
+      "createdAt": "2026-10-04T18:27:01.292Z",
+      "read": false
+    },
+    {
+      "id": "ntf-1791138419228-z0s4n",
+      "workspaceId": "ws-demo",
+      "title": "Meeting scheduled",
+      "message": "Linear Contract Redline Walkthrough is scheduled for 10/16/2026, 9:00:00 AM.",
+      "type": "meeting",
+      "createdAt": "2026-10-04T18:26:59.228Z",
+      "read": false
+    },
+    {
+      "id": "ntf-1791138417178-8csin",
+      "workspaceId": "ws-demo",
+      "title": "Meeting scheduled",
+      "message": "Supabase Technical Deep Dive is scheduled for 10/12/2026, 11:00:00 AM.",
+      "type": "meeting",
+      "createdAt": "2026-10-04T18:26:57.178Z",
+      "read": false
+    },
+    {
+      "id": "ntf-1791138415108-xi3im",
+      "workspaceId": "ws-demo",
+      "title": "Meeting scheduled",
+      "message": "Retool Renewal Risk Review is scheduled for 10/10/2026, 3:00:00 PM.",
+      "type": "meeting",
+      "createdAt": "2026-10-04T18:26:55.108Z",
+      "read": false
+    },
+    {
+      "id": "ntf-1791138413066-3pckz",
+      "workspaceId": "ws-demo",
+      "title": "Meeting scheduled",
+      "message": "Q4 Pricing & Roadmap Strategy Sync is scheduled for 10/9/2026, 10:00:00 AM.",
+      "type": "meeting",
+      "createdAt": "2026-10-04T18:26:53.066Z",
+      "read": false
+    }
+  ],
   "trash": []
 }
