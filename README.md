@@ -3,6 +3,8 @@
 A high-performance, open-source alternative to Salesforce with native Model Context Protocol (MCP) support, persistent multi-tenant storage, and Gemini 3.8 Flash AI automation.
 
 ---
+## Live Demo
+###link:nexaflow-crm.onrender.com/#
 
 ## 🚀 Quickstart for Local AI Coders (Cursor, Windsurf, Claude Code, VS Code)
 
